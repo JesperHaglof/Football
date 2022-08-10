@@ -11,6 +11,9 @@ class espnScraper:
         self.df = pd.DataFrame(columns=['Team', 'Pos', 'Player', 'Age', 'Nationality', 'Market Value (mEuros)'])
         self.team_names = []
         self.base_link = "http://www.espn.com"
+        self.df = pd.DataFrame(columns = ["Team", "Pos", "Nr", "First Name", "Last Name", "Birth Date", "Age",
+                                          "College", "First Season", "Draft Info", "Status"])
+
 
     def get_soup(self, url):
         headers = {
@@ -78,10 +81,59 @@ class espnScraper:
             last_name = player_soup.find_all('span', class_="truncate min-w-0")[0].text
 
             bio = player_soup.find_all('div', class_= "PlayerHeader__Main_Aside min-w-0 flex-grow flex-basis-0")[0]
-            print(first_name, last_name)
-            number = bio.find_all("li", class_="")[0].text
-            position = bio.find_all("li", class_="")[1].text
+            if len(bio.find_all("li", class_="")) > 1:
+                number = bio.find_all("li", class_="")[0].text.replace("#","")
+                position = bio.find_all("li", class_="")[1].text
+            else:
+                position = bio.find_all("li", class_="")[0].text
 
+            bio2 = player_soup.find_all('div', class_="fw-medium clr-black")
+            info = []
+            for line in bio2:
+                info.append(line.text)
+            length = info[0].split(", ")[0]
+            weight = info[0].split(", ")[1]
+            birth_date = info[1].split(" (")[0]
+            if " (" in info[1]:
+                year = info[1].split(" (")[1].replace(")","")
+                college = info[2]
+                if "Rd" in info[3]:
+                    first_season = info[3].split(": ")[0]
+                    drafted_info = info[3].split(": ")[1]
+                    status = info[4]
+                else:
+                    status=info[3]
+                    if info[4] == "Rookie":
+                        first_season = 2022
+                        drafted_info = "Undrafted"
+                    else:
+                        if "th" in info[4]:
+                            exp = info[4].split("th")[0]
+                        elif "rd" in info[4]:
+                            exp = info[4].split("rd")[0]
+                        elif "nd" in info[4]:
+                            exp = info[4].split("nd")[0]
+                        first_season = 2022 - int(exp) + 1
+                        drafted_info = "Undrafted"
+            else:
+                college = info[1]
+                status = info[2]
+                if info[3] == "Rookie":
+                    first_season = 2022
+                    drafted_info = "Undrafted"
+                else:
+                    if "th" in info[3]:
+                        exp = info[3].split("th")[0]
+                    elif "rd" in info[3]:
+                        exp = info[3].split("rd")[0]
+                    elif "nd" in info[3]:
+                        exp = info[3].split("rd")[0]
+                    first_season = 2022 - int(exp) + 1
+                    drafted_info = "Undrafted"
+
+            row = [team_name, position, number, first_name, last_name, birth_date, year, college, first_season, drafted_info, status]
+            self.df.loc[len(self.df)] = row
+            print(row)
 
 
 
