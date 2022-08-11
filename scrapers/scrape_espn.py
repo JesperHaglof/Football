@@ -12,7 +12,7 @@ class espnScraper:
         self.team_names = []
         self.base_link = "http://www.espn.com"
         self.df = pd.DataFrame(columns = ["Team", "Pos", "Nr", "First Name", "Last Name", "Birth Date", "Age",
-                                          "College", "First Season", "Draft Info", "Status"])
+                                          "Length", "Weight", "College", "First Season", "Draft Info", "Status"])
 
 
     def get_soup(self, url):
@@ -40,6 +40,7 @@ class espnScraper:
 
         # Step 1: Get roster end links from team page
         self._scrape_roster_end_links()
+        # Step 2: Get all player info from rosters
         self._scrape_rosters()
 
     def _scrape_rosters(self):
@@ -54,6 +55,8 @@ class espnScraper:
             self._scrape_player_links(roster_link)
             # Scrape down player info, from profile page
             self._scrape_player_info(team_name)
+            # Empty player links again
+            self.player_links = []
 
     def _scrape_team_name(self, roster_link):
 
@@ -131,7 +134,7 @@ class espnScraper:
                     first_season = 2022 - int(exp) + 1
                     drafted_info = "Undrafted"
 
-            row = [team_name, position, number, first_name, last_name, birth_date, year, college, first_season, drafted_info, status]
+            row = [team_name, position, number, first_name, last_name, birth_date, year, length, weight, college, first_season, drafted_info, status]
             self.df.loc[len(self.df)] = row
             print(row)
 
