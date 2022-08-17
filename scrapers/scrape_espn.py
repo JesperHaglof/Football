@@ -94,30 +94,47 @@ class espnScraper:
             info = []
             for line in bio2:
                 info.append(line.text)
+                print(line.text)
             length = info[0].split(", ")[0]
             weight = info[0].split(", ")[1]
             birth_date = info[1].split(" (")[0]
             if " (" in info[1]:
                 year = info[1].split(" (")[1].replace(")","")
-                college = info[2]
+                if info[2] in ["Active", "Out"]:
+                    status = info[2]
+                else:
+                    college = info[2]
                 if "Rd" in info[3]:
                     first_season = info[3].split(": ")[0]
                     drafted_info = info[3].split(": ")[1]
                     status = info[4]
                 else:
-                    status=info[3]
-                    if info[4] == "Rookie":
-                        first_season = 2022
-                        drafted_info = "Undrafted"
+                    if "th" in info[3] or "nd" in info[3] or "rd" in info[3]:
+                        exp = info[3].split("th")[0]
+                        first_season =  2022 - int(exp) + 1
                     else:
-                        if "th" in info[4]:
-                            exp = info[4].split("th")[0]
-                        elif "rd" in info[4]:
-                            exp = info[4].split("rd")[0]
-                        elif "nd" in info[4]:
-                            exp = info[4].split("nd")[0]
-                        first_season = 2022 - int(exp) + 1
-                        drafted_info = "Undrafted"
+                        status=info[3]
+                    if len(info) > 4:
+                        if info[4] == "Rookie":
+                            first_season = 2022
+                            drafted_info = "Undrafted"
+                        else:
+                            if "th" in info[4]:
+                                exp = info[4].split("th")[0]
+                                first_season = 2022 - int(exp) + 1
+                            elif "rd" in info[4]:
+                                exp = info[4].split("rd")[0]
+                                first_season = 2022 - int(exp) + 1
+                            elif "nd" in info[4]:
+                                if "London" in info[4]:
+                                    college = "London, England"
+                                else:
+                                    exp = info[4].split("nd")[0]
+                                    first_season = 2022 - int(exp) + 1
+                            else:
+                                exp = 1
+                                first_season = 2022
+                            drafted_info = "Undrafted"
             else:
                 college = info[1]
                 status = info[2]
